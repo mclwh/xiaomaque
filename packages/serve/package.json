@@ -1,0 +1,42 @@
+{
+  "name": "@xiaoyunque/serve",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon",
+    "start": "dotenv -e .env.production -- node dist/index.js",
+    "build": "tsc",
+    "test": "vitest run",
+    "generate:image-style-previews": "dotenv -e .env.development -- tsx scripts/generateImageStylePreviews.ts",
+    "pg": "prisma generate",
+    "db:push": "dotenv -e .env.development -- prisma db push",
+    "pmd": "dotenv -e .env.development -- prisma migrate dev",
+    "db:studio": "dotenv -e .env.development -- prisma studio",
+    "postinstall": "prisma generate"
+  },
+  "dependencies": {
+    "@langchain/core": "^0.3.42",
+    "@langchain/openai": "^0.4.4",
+    "@prisma/client": "^6.4.1",
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "langchain": "^0.3.19",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.13.4",
+    "dotenv-cli": "^8.0.0",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.4.1",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.9"
+  }
+}

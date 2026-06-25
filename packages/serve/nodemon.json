@@ -1,0 +1,7 @@
+{
+  "watch": ["src"],
+  "ext": "ts,json",
+  "signal": "SIGTERM",
+  "delay": 500,
+  "exec": "dotenv -e .env.development -- tsx src/index.ts"
+}

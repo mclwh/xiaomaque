@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `asset` MODIFY `name` VARCHAR(191) NULL,
+    MODIFY `url` VARCHAR(191) NULL;

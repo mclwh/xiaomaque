@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id       Int     @id @default(autoincrement())
+  phone    String  @unique
+  password String?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  userinfo            userinfo?
+  projects            project[]
+}
+
+model userinfo {
+  id         Int      @id @default(autoincrement())
+  nickname   String?
+  avatar     String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user_id Int  @unique
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model project {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  content     Json?
+  params      Json?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  user_id Int
+  user    user @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  assets asset[]
+  series serie[]
+  script script?
+
+  @@index([user_id])
+}
+
+model script {
+  id         Int      @id @default(autoincrement())
+  name       String
+  source     String?  @db.Text
+  summary    Json?
+  serie_content    Json?
+  params     Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  serie_id Int? @unique
+  serie    serie? @relation(fields: [serie_id], references: [id])
+  project_id Int     @unique
+  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+}
+
+model asset {
+  id         Int      @id @default(autoincrement())
+  // type 资产分类：character 角色 | scene 场景 | prop 道具 | material 素材 | none 未归类
+  // 画布中的 video / text / image / audio 节点 type 为 none，具体媒体类型见 asset_type
+  type       String   @default("none")
+  // asset_type 媒体类型：image | video | text | audio
+  asset_type String   @default("image")
+  name       String?
+  cover      String?
+  url        String?
+  // params 扩展字段；角色形象名存 params.canvas.appearanceName
+  params     Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  project_id Int
+  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  derive_id String? @db.VarChar(10)
+
+  asset_series              asset_serie[]
+  serie_fragment_references  serie_fragment_reference[] @relation("SerieFragmentReferenceAsset")
+
+  @@index([project_id])
+  @@index([derive_id])
+}
+
+model serie {
+  id         Int      @id @default(autoincrement())
+  name       String
+  params     Json?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  project_id Int
+  project    project @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  asset_series   asset_serie[]
+  script         script?
+  serie_fragments serie_fragment[]
+
+  @@index([project_id])
+}
+
+// 分集分镜片段（原 serie.fragments JSON 拆表）
+model serie_fragment {
+  id                  Int      @id @default(autoincrement())
+  // serie_id 所属分集
+  serie_id            Int
+  // sort_order 分镜在分集内的排序（底栏从左到右）
+  sort_order          Int      @default(0)
+  // content 分镜脚本文案（含 @asset:id 占位与时长 chip 标记）；MySQL TEXT 不支持 DEFAULT，插入时由应用层写空串
+  content             String   @db.Text
+  // cover 生成视频后的封面图 URL（通常取首帧）
+  cover               String   @default("")
+  // video 生成完成后的视频 URL
+  video               String   @default("")
+  // duration_sec 分镜目标时长（秒），用于底栏「片段 01 · 10s」展示
+  duration_sec        Int?
+  params              Json?
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  serie            serie                      @relation(fields: [serie_id], references: [id], onDelete: Cascade)
+  // asset_references 脚本中 @ 引用的资产列表（顺序与 content 中出现顺序一致）
+  asset_references serie_fragment_reference[]
+
+  @@index([serie_id])
+}
+
+// 分镜片段与资产的引用关联（仅存 ID，名称/url 等读 asset 表）
+model serie_fragment_reference {
+  id          Int @id @default(autoincrement())
+  // fragment_id 所属分镜片段
+  fragment_id Int
+  // asset_id 被引用的项目资产（角色/场景/道具等）
+  asset_id    Int
+
+  fragment serie_fragment @relation(fields: [fragment_id], references: [id], onDelete: Cascade)
+  asset    asset          @relation("SerieFragmentReferenceAsset", fields: [asset_id], references: [id], onDelete: Cascade)
+
+  @@unique([fragment_id, asset_id])
+  @@index([fragment_id])
+  @@index([asset_id])
+}
+
+// asset 与 serie 多对多关联表
+model asset_serie {
+  id         Int      @id @default(autoincrement())
+  asset_id   Int
+  serie_id   Int
+  created_at DateTime @default(now())
+
+  asset asset @relation(fields: [asset_id], references: [id], onDelete: Cascade)
+  serie serie @relation(fields: [serie_id], references: [id], onDelete: Cascade)
+
+  @@unique([asset_id, serie_id])
+  @@index([asset_id])
+  @@index([serie_id])
+}

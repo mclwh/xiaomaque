@@ -1,0 +1,148 @@
+---
+description: 项目编码规范（注释、目录结构、状态管理、样式、代码组织与复用等）
+alwaysApply: true
+---
+
+# 编码规范
+
+编写或修改代码时，必须遵守以下规范。
+
+## 函数注释
+
+每个函数的顶部都要有一段功能注释。
+
+- 简单函数：使用单行 `//` 注释
+- 复杂函数：使用 JSDoc 块注释，说明功能、参数与返回值
+
+### 简单函数示例
+
+```javascript
+// 返回参数相加的结果
+const sum = (a, b) => {
+  return a + b;
+};
+```
+
+### 复杂函数示例
+
+```javascript
+/**
+ * 冒泡排序：基础排序算法，重复遍历数组，比较相邻元素并交换位置
+ * 每一轮遍历会将当前未排序部分的最大值逐步"冒泡"到末尾
+ * @param {Array} arr - 需要排序的数字数组
+ * @returns {Array} 升序排列后的新数组（不修改原数组）
+ */
+function bubbleSort(arr) {
+  const list = [...arr];
+  const len = list.length;
+
+  for (let i = 0; i < len - 1; i++) {
+    for (let j = 0; j < len - 1 - i; j++) {
+      if (list[j] > list[j + 1]) {
+        [list[j], list[j + 1]] = [list[j + 1], list[j]];
+      }
+    }
+  }
+  return list;
+}
+```
+
+TypeScript / React 组件中，导出函数、组件、Hook 同样需要顶部功能注释；复杂类型可使用 `@param`、`@returns` 标注。
+
+## 变量注释
+
+每个变量都要有注释。多个变量连续声明时，在其顶部用块注释统一说明，无需逐行重复。
+
+### 变量注释示例
+
+```javascript
+/*
+ * list 列表数组
+ * page 页码
+ * pageSize 每页数量
+ * len 列表长度
+ */
+const list = [];
+const page = 0;
+const pageSize = 20;
+let len = null;
+```
+
+单个变量时，可在声明行上方使用单行 `//` 注释说明用途。
+
+## 状态管理
+
+前端凡适合用全局状态管理的场景，**统一使用 Redux**（推荐 Redux Toolkit）。
+
+- 跨页面、跨组件共享的状态 → 放入 `store/`，使用 slice + reducer 管理
+- 用户登录态、权限、应用配置、列表缓存等 → 使用 Redux，不要用 `useState` 层层传递或自建 Context
+- 仅组件内部的 UI 临时状态（如弹窗开关、输入框焦点）→ 可保留本地 `useState`
+- 异步数据请求结果若需全局共享或缓存 → 使用 Redux，可配合 RTK Query
+
+## 代码组织
+
+单个代码文件**尽量不要超过 500 行**。文件过长时，应主动拆分：
+
+- 公共逻辑 → 提取到 `lib/`、`utils/` 或 `hooks/`
+- 可复用 UI → 提取到 `components/` 独立组件
+- 业务模块 → 按职责拆分为多个 service、controller 或页面子组件
+
+## 代码复用
+
+优先编写**可复用的组件或工具函数**，避免重复实现相同逻辑。
+
+- 编写新功能前，先检查 `components/`、`hooks/`、`lib/`、`utils/` 是否已有可复用实现
+- 两处及以上出现相似逻辑时，立即抽取为公共函数或组件
+- 组件设计保持单一职责，通过 props 配置差异，便于在多个页面复用
+
+## 样式编写
+
+前端样式**优先使用 Tailwind CSS 工具类**在组件内直接实现；仅当 Tailwind 无法表达或代价过高时，才在 `index.css` 等位置编写额外 CSS。
+
+- 布局、间距、颜色、圆角、阴影、字体、响应式等 → 使用 Tailwind 类名（可配合 `cn()` 合并）
+- 不在组件能写 Tailwind 的地方新增独立 CSS 规则
+- 以下情况可写额外 CSS：
+  - 复杂 `calc()`、`min()` 等 Tailwind 不便表达的计算（如自适应宽度公式）
+  - 第三方库样式覆盖（如 React Flow、shadcn 组件内部结构）
+  - 全局主题变量、CSS 变量、`@layer` 基础样式
+  - 伪元素 / 选择器组合过于冗长，抽取为语义化 class 更清晰时
+- 新增自定义 class 时，优先放在组件 `className` 中与 Tailwind 混用，避免重复定义 Tailwind 已有能力
+
+---
+
+# src 目录结构
+
+本项目为 monorepo，前端与后端各有独立的 `src` 目录。
+
+## packages/client/src（前端）
+
+| 目录/文件 | 作用 |
+|-----------|------|
+| `main.tsx` | 应用入口，挂载 React 根节点与 `RouterProvider` |
+| `router/` | 路由配置，使用 `createBrowserRouter` 定义页面路由 |
+| `layouts/` | 布局组件，通过 `<Outlet />` 渲染子路由（类似 Vue 的 `router-view`） |
+| `pages/` | 页面级组件，与路由一一对应 |
+| `components/ui/` | shadcn/ui 组件，由 CLI 安装的可复用 UI 组件 |
+| `api/` | 接口请求层，封装与后端的 HTTP 调用，按业务模块分子文件 |
+| `assets/` | 静态资源（图片、字体、图标、音视频等），通过 import 或 URL 引用 |
+| `hooks/` | 可复用的组合式逻辑（React Hooks），抽离跨组件的状态与副作用 |
+| `store/` | Redux 全局状态，存放 slice、reducer、store 配置及类型定义 |
+| `lib/` | 前端工具函数（如 `cn` 样式合并） |
+| `index.css` | 全局样式、Tailwind CSS 与主题 CSS 变量 |
+| `vite-env.d.ts` | Vite 环境类型声明 |
+
+## packages/serve/src（后端）
+
+| 目录/文件 | 作用 |
+|-----------|------|
+| `index.ts` | 服务启动入口，监听端口并启动 HTTP 服务 |
+| `app.ts` | 创建 Express 应用实例，注册全局中间件与 `/api` 路由 |
+| `config/` | 环境变量、Prisma 数据库等配置 |
+| `routes/` | 路由汇总，将各模块控制器挂载到 Express Router |
+| `controllers/` | 控制器层，按业务模块分子目录；文件名决定 HTTP 方法与路径（约定式路由） |
+| `middleware/` | 中间件（JWT 鉴权、日志、参数校验、统一错误处理等） |
+| `services/` | 业务逻辑层，封装数据库操作与核心业务 |
+| `validators/` | 请求参数校验规则（配合校验中间件使用） |
+| `utils/` | 后端工具函数（自动路由、JWT、统一响应格式等） |
+
+新增文件时，请放入对应职责目录，并保持与上表一致的分层约定。
