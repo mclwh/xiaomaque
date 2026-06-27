@@ -61,6 +61,33 @@ const IMAGE_STYLE_PROMPTS: Record<ImageStyleId, string> = {
         "中国皮影戏插画画风，剪影轮廓，镂空纹理，暖色背光，民间艺术装饰性，层叠投影效果",
 };
 
+// IMAGE_STYLE_LABELS 各风格展示名称（与前端 imageStyles.ts 保持一致）
+const IMAGE_STYLE_LABELS: Record<ImageStyleId, string> = {
+    "retro-sci-fi-atompunk": "复古科幻原子朋克",
+    "palace-intrigue-cold": "宫斗权谋冷峻",
+    "domestic-suspense-cold": "国产悬疑冷调",
+    "ancient-romance-soft": "古偶唯美柔光",
+    "japanese-youth-film": "日式青春胶片",
+    "japanese-daily-natural": "日式生活自然",
+    "korean-urban-soft": "韩剧都市柔光",
+    "chinese-urban-realistic": "国产都市写实",
+    "wuxia-realistic-photo": "武侠江湖写实摄影",
+    "90s-realistic-film": "90年代写实电影",
+    "retro-narrative-film": "复古叙事电影",
+    "american-retro-hollywood": "美式复古好莱坞",
+    "neon-cyberpunk-film": "霓虹赛博电影",
+    "90s-rural-china-film": "90年代中国农村电影",
+    "tezuka-era-cartoon": "手冢治虫时代卡通画风",
+    "shanghai-animation": "上美画风",
+    "pixel-art": "像素风",
+    "shadow-puppet-illustration": "皮影戏插画",
+};
+
+// 根据风格 ID 返回展示名称
+export function getImageStyleLabel(styleId: ImageStyleId): string {
+    return IMAGE_STYLE_LABELS[styleId];
+}
+
 // 根据风格 ID 返回生图提示词片段，无效 ID 返回空字符串
 export function resolveImageStylePrompt(styleId?: ImageStyleId): string {
     if (!styleId) {

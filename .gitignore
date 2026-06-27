@@ -8,3 +8,6 @@ dist
 .DS_Store
 coverage
 .turbo
+
+# 本地图片风格预览资源，不入库
+packages/client/public/image-styles/

@@ -6,6 +6,7 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(1),
     JWT_EXPIRES_IN: z.string().default("7d"),
     OPENAI_API_KEY: z.string().optional(),
+    OPENAI_BASE_URL: z.string().url().optional(),
     ARK_API_KEY: z.string().optional(),
     ARK_BASE_URL: z
         .string()

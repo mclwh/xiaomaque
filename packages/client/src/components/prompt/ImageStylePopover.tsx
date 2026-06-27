@@ -1,5 +1,5 @@
 // 图片风格选择弹层（画布生图面板）
-import { useRef, useState } from "react";
+import { useRef, useState, type ElementType } from "react";
 import { Check, ChevronDown, Smile } from "lucide-react";
 import { PromptPopoverPanel } from "@/components/prompt/PromptPopoverPanel";
 import { type PromptPopoverInteractionProps } from "@/components/prompt/promptPopoverUtils";
@@ -13,6 +13,9 @@ type ImageStylePopoverProps = PromptPopoverInteractionProps & {
     onValueChange?: (styleId: ImageStyleId | undefined) => void;
     panelTitle?: string;
     triggerFallbackLabel?: string;
+    triggerIcon?: ElementType;
+    triggerVariant?: "pill" | "toolbar";
+    showDivider?: boolean;
 };
 
 // 渲染图片/视频风格选择弹层
@@ -23,12 +26,17 @@ export function ImageStylePopover({
     onValueChange,
     panelTitle = "图片风格",
     triggerFallbackLabel = "风格",
+    triggerIcon,
+    triggerVariant = "pill",
+    showDivider = false,
 }: ImageStylePopoverProps) {
     const rootRef = useRef<HTMLDivElement>(null);
     const panelRef = useRef<HTMLDivElement>(null);
     const [open, setOpen] = useState(false);
     const selectedLabel = getImageStyleLabel(value);
     const triggerLabel = selectedLabel ?? triggerFallbackLabel;
+    // TriggerIcon 触发按钮图标组件
+    const TriggerIcon = triggerIcon ?? Smile;
 
     usePopoverDismiss(rootRef, open, () => setOpen(false), [panelRef]);
 
@@ -44,28 +52,51 @@ export function ImageStylePopover({
     };
 
     return (
-        <div ref={rootRef} className="relative">
-            <button
-                type="button"
-                aria-expanded={open}
-                aria-haspopup="dialog"
-                onClick={handleToggleOpen}
-                className={cn(
-                    "nodrag inline-flex h-8 max-w-[140px] cursor-pointer items-center gap-1 rounded-full px-3 text-sm transition",
-                    open || selectedLabel
-                        ? "bg-violet-50 text-violet-700"
-                        : "text-slate-700 hover:bg-slate-100",
-                )}
-            >
-                <Smile className="size-4 shrink-0 text-violet-500" strokeWidth={1.8} />
-                <span className="truncate">{triggerLabel}</span>
-                <ChevronDown
-                    className={cn("size-4 shrink-0 text-slate-400 transition", open ? "rotate-180" : "")}
-                    strokeWidth={1.8}
-                />
-            </button>
+        <>
+            <div ref={rootRef} className="relative">
+                <button
+                    type="button"
+                    aria-expanded={open}
+                    aria-haspopup="dialog"
+                    onClick={handleToggleOpen}
+                    className={cn(
+                        "nodrag inline-flex cursor-pointer items-center gap-1 transition",
+                        triggerVariant === "toolbar"
+                            ? cn(
+                                  "h-9 max-w-[140px] gap-1.5 px-3 text-sm",
+                                  open || selectedLabel
+                                      ? "text-violet-700"
+                                      : "text-slate-700 hover:text-slate-900",
+                              )
+                            : cn(
+                                  "h-8 max-w-[140px] rounded-full px-3 text-sm",
+                                  open || selectedLabel
+                                      ? "bg-violet-50 text-violet-700"
+                                      : "text-slate-700 hover:bg-slate-100",
+                              ),
+                    )}
+                >
+                    <TriggerIcon
+                        className={cn(
+                            "size-4 shrink-0",
+                            triggerVariant === "toolbar"
+                                ? "text-slate-500"
+                                : "text-violet-500",
+                        )}
+                        strokeWidth={1.8}
+                    />
+                    <span className="truncate">{triggerLabel}</span>
+                    <ChevronDown
+                        className={cn(
+                            "size-4 shrink-0 text-slate-400 transition",
+                            triggerVariant === "toolbar" ? "size-3.5" : "",
+                            open ? "rotate-180" : "",
+                        )}
+                        strokeWidth={triggerVariant === "toolbar" ? 2 : 1.8}
+                    />
+                </button>
 
-            <PromptPopoverPanel
+                <PromptPopoverPanel
                 open={open}
                 triggerRef={rootRef}
                 panelRef={panelRef}
@@ -130,6 +161,8 @@ export function ImageStylePopover({
                     </div>
                 </div>
             </PromptPopoverPanel>
-        </div>
+            </div>
+            {showDivider ? <span className="h-4 w-px shrink-0 bg-slate-200" aria-hidden /> : null}
+        </>
     );
 }

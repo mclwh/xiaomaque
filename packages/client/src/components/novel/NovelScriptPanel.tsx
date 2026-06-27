@@ -43,7 +43,7 @@ export function NovelScriptPanel({ activeTab, onTabChange }: NovelScriptPanelPro
 
     return (
         <section className="relative mx-auto w-full max-w-[720px]">
-            <div className="xyq-novel-tabs mx-auto flex w-full max-w-[720px] max-h-[260px] flex-col">
+            <div className="xyq-novel-tabs mx-auto flex w-full max-w-[720px] max-h-[min(80vh,720px)] flex-col">
                 <div className="flex h-10 shrink-0 items-stretch overflow-hidden rounded-t-3xl bg-[#d9d9df]">
                     {SCRIPT_TABS.map((tab, index) => {
                         // activeIndex 当前激活 Tab 的下标

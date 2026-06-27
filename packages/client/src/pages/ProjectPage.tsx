@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { ProjectAssetStep } from "@/components/project/ProjectAssetStep";
+import { ProjectOutlineStep } from "@/components/project/ProjectOutlineStep";
 import { ProjectEditableTitle } from "@/components/project/ProjectEditableTitle";
 import { ProjectEpisodeStep } from "@/components/project/ProjectEpisodeStep";
 import { ProjectStepBar } from "@/components/project/ProjectStepBar";
@@ -23,11 +24,18 @@ export function ProjectPage() {
     const [toastMessage, setToastMessage] = useState("");
 
     useEffect(() => {
-        // returnStep 从编辑页返回时需要恢复的工作流步骤
-        const returnStep = (location.state as { returnStep?: ProjectStepKey } | null)?.returnStep;
+        // locationState 路由 state：支持从 AI 面板跳转或编辑页返回
+        const locationState = location.state as
+            | { activeStep?: ProjectStepKey; returnStep?: ProjectStepKey }
+            | null;
 
-        if (returnStep) {
-            setActiveStep(returnStep);
+        if (locationState?.activeStep) {
+            setActiveStep(locationState.activeStep);
+            return;
+        }
+
+        if (locationState?.returnStep) {
+            setActiveStep(locationState.returnStep);
         }
     }, [location.state, setActiveStep]);
 
@@ -89,9 +97,10 @@ export function ProjectPage() {
 
             <main>
                 {activeStep === "outline" ? (
-                    <div className="mx-auto flex min-h-[320px] max-w-[920px] items-center justify-center px-6 py-16 text-sm text-slate-400">
-                        剧情大纲编辑区开发中
-                    </div>
+                    <ProjectOutlineStep
+                        projectId={numericProjectId}
+                        onProjectTitleChange={updateProjectTitle}
+                    />
                 ) : null}
 
                 {activeStep === "assets" ? (
