@@ -5,7 +5,9 @@ module.exports = {
             name: "xiaomaque-api",
             cwd: "./packages/serve",
             script: "dist/index.js",
-            env_file: ".env.production",
+            env: {
+                NODE_ENV: "production",
+            },
             instances: 1,
             exec_mode: "fork",
             autorestart: true,

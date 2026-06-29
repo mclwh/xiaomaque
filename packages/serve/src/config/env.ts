@@ -1,4 +1,36 @@
+// 环境变量加载与校验
+import { existsSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { config } from "dotenv";
 import { z } from "zod";
+
+// packageRoot serve 包根目录（src/config 与 dist/config 均适用）
+const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+
+// 启动前加载 .env 文件，兼容 PM2 直接 node dist/index.js 的场景
+function loadEnvFile() {
+    const isProduction = process.env.NODE_ENV === "production";
+    // candidates 按优先级尝试的环境文件列表
+    const candidates = isProduction
+        ? [resolve(packageRoot, ".env.production"), resolve(packageRoot, ".env")]
+        : [
+              resolve(packageRoot, ".env.development"),
+              resolve(packageRoot, ".env.production"),
+              resolve(packageRoot, ".env"),
+          ];
+
+    for (const envPath of candidates) {
+        if (!existsSync(envPath)) {
+            continue;
+        }
+
+        config({ path: envPath });
+        return;
+    }
+}
+
+loadEnvFile();
 
 const envSchema = z.object({
     PORT: z.coerce.number().default(3000),
@@ -33,8 +65,15 @@ function parseEnv() {
     const result = envSchema.safeParse(process.env);
 
     if (!result.success) {
+        const missingKeys = result.error.issues
+            .map((issue) => issue.path.join("."))
+            .join(", ");
+
         console.error(
-            "[env] 环境变量校验失败，请确认已创建 packages/serve/.env.development（可参考 .env.development.example）",
+            [
+                "[env] 环境变量校验失败，请检查 packages/serve/.env.production（生产）或 .env.development（开发）",
+                `[env] 问题字段：${missingKeys}`,
+            ].join("\n"),
         );
         throw result.error;
     }
