@@ -1,5 +1,5 @@
-// 路由配置：嵌套路由在父级布局的 Outlet 中渲染
-import { createBrowserRouter } from "react-router-dom";
+// 路由配置：Hash 路由，嵌套路由在父级布局的 Outlet 中渲染
+import { createHashRouter } from "react-router-dom";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { RootLayout } from "@/layouts/RootLayout";
 import { HomePage } from "@/pages/HomePage";
@@ -11,7 +11,7 @@ import { ProjectPage } from "@/pages/ProjectPage";
 import { AssetPage } from "@/pages/AssetPage";
 import { RouteErrorFallback } from "@/components/RouteErrorFallback";
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
     {
         path: "/login",
         element: <AuthLayout />,
