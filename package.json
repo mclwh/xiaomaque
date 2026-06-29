@@ -1,12 +1,12 @@
 {
-    "name": "xiaoyunque",
-    "private": true,
+    "name": "xiaomaque",
     "version": "0.0.0",
+    "license": "MIT",
     "scripts": {
-        "dc": "pnpm --filter @xiaoyunque/client dev",
-        "ds": "pnpm --filter @xiaoyunque/serve dev",
-        "build:client": "pnpm --filter @xiaoyunque/client build",
-        "build:serve": "pnpm --filter @xiaoyunque/serve build",
+        "dc": "pnpm --filter @xiaomaque/client dev",
+        "ds": "pnpm --filter @xiaomaque/serve dev",
+        "build:client": "pnpm --filter @xiaomaque/client build",
+        "build:serve": "pnpm --filter @xiaomaque/serve build",
         "build": "pnpm build:serve && pnpm build:client"
     },
     "devDependencies": {

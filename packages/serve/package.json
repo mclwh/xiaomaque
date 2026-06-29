@@ -1,7 +1,7 @@
 {
-  "name": "@xiaoyunque/serve",
-  "private": true,
+  "name": "@xiaomaque/serve",
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "nodemon",

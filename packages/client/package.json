@@ -1,7 +1,7 @@
 {
-  "name": "@xiaoyunque/client",
-  "private": true,
+  "name": "@xiaomaque/client",
   "version": "0.0.0",
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "vite",
