@@ -1,7 +1,8 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
-import { env } from "../config/env.js";
+import { isOpenaiApiKeyAvailable } from "../lib/openaiApiKey.js";
+import { getRequestOpenaiApiKeyOverride } from "../lib/requestOpenaiApiKeyContext.js";
 import { createChatModel } from "./llm.js";
 import { AGENT_REGISTRY, formatAgentsForPrompt, getAgentById } from "./registry.js";
 import type { AgentRouteResult } from "./types.js";
@@ -152,7 +153,7 @@ export async function routeToAgent(query: string): Promise<AgentRouteResult> {
 
     assertRegistryNotEmpty();
 
-    if (!env.OPENAI_API_KEY) {
+    if (!isOpenaiApiKeyAvailable(getRequestOpenaiApiKeyOverride())) {
         return fallbackRouteByKeywords(trimmed);
     }
 

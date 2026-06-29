@@ -3,6 +3,7 @@ import cors from "cors";
 import { env } from "./config/env.js";
 import { loggerMiddleware } from "./middleware/logger.js";
 import { errorMiddleware } from "./middleware/error.js";
+import { openaiApiKeyMiddleware } from "./middleware/openaiApiKey.js";
 import { signatureMiddleware, type SignedRequest } from "./middleware/signature.js";
 import routes from "./routes/index.js";
 
@@ -28,6 +29,7 @@ export function createApp() {
                 "X-Nonce",
                 "X-Signature",
                 "X-Ark-Api-Key",
+                "X-Openai-Api-Key",
             ],
         }),
     );
@@ -39,6 +41,7 @@ export function createApp() {
         }),
     );
     app.use(loggerMiddleware);
+    app.use("/api", openaiApiKeyMiddleware);
     app.use("/api", signatureMiddleware);
     app.use("/api", routes);
 

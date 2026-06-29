@@ -1,9 +1,13 @@
 // API KEY 设置按钮：打开火山方舟 Key 配置弹窗
 import { Settings } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CanvasToolbarTooltip } from "@/components/canvas/CanvasToolbarTooltip";
 import { ArkApiKeySettingsDialog } from "@/components/home/ArkApiKeySettingsDialog";
-import { hasCustomArkApiKey } from "@/lib/arkApiKeyStorage";
+import { hasCustomArkApiKey, ARK_API_KEY_CHANGED_EVENT } from "@/lib/arkApiKeyStorage";
+import {
+    hasCustomOpenaiApiKey,
+    OPENAI_API_KEY_CHANGED_EVENT,
+} from "@/lib/openaiApiKeyStorage";
 import { cn } from "@/lib/utils";
 
 type ArkApiKeySettingsButtonProps = {
@@ -30,8 +34,24 @@ export function ArkApiKeySettingsButton({
 }: ArkApiKeySettingsButtonProps) {
     // settingsOpen 设置弹窗是否打开
     const [settingsOpen, setSettingsOpen] = useState(false);
-    // usingCustomArkKey 是否已配置自定义 Key
-    const [usingCustomArkKey, setUsingCustomArkKey] = useState(hasCustomArkApiKey);
+    // usingCustomKey 是否已配置任一自定义 Key
+    const [usingCustomKey, setUsingCustomKey] = useState(
+        () => hasCustomArkApiKey() || hasCustomOpenaiApiKey(),
+    );
+
+    useEffect(() => {
+        const refreshCustomKeyState = () => {
+            setUsingCustomKey(hasCustomArkApiKey() || hasCustomOpenaiApiKey());
+        };
+
+        window.addEventListener(ARK_API_KEY_CHANGED_EVENT, refreshCustomKeyState);
+        window.addEventListener(OPENAI_API_KEY_CHANGED_EVENT, refreshCustomKeyState);
+
+        return () => {
+            window.removeEventListener(ARK_API_KEY_CHANGED_EVENT, refreshCustomKeyState);
+            window.removeEventListener(OPENAI_API_KEY_CHANGED_EVENT, refreshCustomKeyState);
+        };
+    }, []);
 
     // 打开设置弹窗
     const handleOpenSettings = useCallback(() => {
@@ -41,7 +61,7 @@ export function ArkApiKeySettingsButton({
     // 关闭设置弹窗并刷新自定义 Key 状态
     const handleCloseSettings = useCallback(() => {
         setSettingsOpen(false);
-        setUsingCustomArkKey(hasCustomArkApiKey());
+        setUsingCustomKey(hasCustomArkApiKey() || hasCustomOpenaiApiKey());
     }, []);
 
     const triggerButton = (
@@ -52,7 +72,7 @@ export function ArkApiKeySettingsButton({
             onClick={handleOpenSettings}
         >
             <Settings className="size-4 text-slate-900" strokeWidth={1.8} />
-            {usingCustomArkKey ? (
+            {usingCustomKey ? (
                 <span className="absolute right-1 top-1 size-2 rounded-full bg-emerald-500" />
             ) : null}
         </button>

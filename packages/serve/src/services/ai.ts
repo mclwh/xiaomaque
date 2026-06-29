@@ -1,27 +1,25 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { HumanMessage } from "@langchain/core/messages";
 import { env } from "../config/env.js";
+import { resolveOpenaiApiKey } from "../lib/openaiApiKey.js";
+import { getRequestOpenaiApiKeyOverride } from "../lib/requestOpenaiApiKeyContext.js";
 
 /**
  * LangChain AI 服务：封装 OpenAI 对话能力
  */
 export class AiService {
-    private model: ChatOpenAI | null = null;
-
+    // 获取当前请求上下文下的 ChatOpenAI 实例
     private getModel(): ChatOpenAI {
-        if (!env.OPENAI_API_KEY) {
-            throw new Error("未配置 OPENAI_API_KEY");
-        }
+        const apiKey = resolveOpenaiApiKey(getRequestOpenaiApiKeyOverride());
 
-        if (!this.model) {
-            this.model = new ChatOpenAI({
-                openAIApiKey: env.OPENAI_API_KEY,
-                modelName: "gpt-4o-mini",
-                temperature: 0.7,
-            });
-        }
-
-        return this.model;
+        return new ChatOpenAI({
+            openAIApiKey: apiKey,
+            modelName: "gpt-4o-mini",
+            temperature: 0.7,
+            configuration: env.OPENAI_BASE_URL
+                ? { baseURL: env.OPENAI_BASE_URL }
+                : undefined,
+        });
     }
 
     async chat(message: string): Promise<string> {

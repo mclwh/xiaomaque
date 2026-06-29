@@ -1,6 +1,7 @@
 import axios, { type AxiosRequestConfig } from "axios";
 import { ApiError, type ApiResponse } from "@/api/types";
 import { ARK_API_KEY_HEADER, loadArkApiKey } from "@/lib/arkApiKeyStorage";
+import { OPENAI_API_KEY_HEADER, loadOpenaiApiKey } from "@/lib/openaiApiKeyStorage";
 import { isUnauthorizedResponse, redirectToLoginOnUnauthorized } from "@/lib/authRedirect";
 import { attachRequestSignature } from "@/lib/requestSign";
 import { store } from "@/store";
@@ -50,6 +51,12 @@ http.interceptors.request.use(async (config) => {
 
     if (arkApiKey) {
         config.headers.set(ARK_API_KEY_HEADER, arkApiKey);
+    }
+
+    const openaiApiKey = loadOpenaiApiKey();
+
+    if (openaiApiKey) {
+        config.headers.set(OPENAI_API_KEY_HEADER, openaiApiKey);
     }
 
     return config;

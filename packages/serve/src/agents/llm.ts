@@ -1,5 +1,7 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { env } from "../config/env.js";
+import { resolveOpenaiApiKey } from "../lib/openaiApiKey.js";
+import { getRequestOpenaiApiKeyOverride } from "../lib/requestOpenaiApiKeyContext.js";
 
 /**
  * Agent 共用 LLM 工厂：统一模型与 OpenAI 兼容接口配置
@@ -13,12 +15,10 @@ export const DEFAULT_LLM_MODEL = "kimi-k2.6";
  * @param temperature 采样温度
  */
 export function createChatModel(temperature = 0.2): ChatOpenAI {
-    if (!env.OPENAI_API_KEY) {
-        throw new Error("未配置 OPENAI_API_KEY");
-    }
+    const apiKey = resolveOpenaiApiKey(getRequestOpenaiApiKeyOverride());
 
     return new ChatOpenAI({
-        openAIApiKey: env.OPENAI_API_KEY,
+        openAIApiKey: apiKey,
         modelName: DEFAULT_LLM_MODEL,
         temperature,
         configuration: env.OPENAI_BASE_URL

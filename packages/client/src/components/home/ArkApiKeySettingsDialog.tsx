@@ -1,36 +1,47 @@
-// 顶栏 ARK API Key 设置弹窗：本地保存并随请求发送给服务端
+// 顶栏 API Key 设置弹窗：本地保存火山方舟与 OpenAI Key，并随请求发送给服务端
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { clearArkApiKey, loadArkApiKey, saveArkApiKey } from "@/lib/arkApiKeyStorage";
+import {
+    clearOpenaiApiKey,
+    loadOpenaiApiKey,
+    saveOpenaiApiKey,
+} from "@/lib/openaiApiKeyStorage";
 
 type ArkApiKeySettingsDialogProps = {
     open: boolean;
     onClose: () => void;
 };
 
-// 渲染 ARK API Key 设置弹窗
+// 渲染 API Key 设置弹窗
 export function ArkApiKeySettingsDialog({ open, onClose }: ArkApiKeySettingsDialogProps) {
-    // apiKeyInput 输入框中的 Key
-    const [apiKeyInput, setApiKeyInput] = useState("");
+    // arkApiKeyInput 火山方舟 Key 输入
+    const [arkApiKeyInput, setArkApiKeyInput] = useState("");
+    // openaiApiKeyInput OpenAI Key 输入
+    const [openaiApiKeyInput, setOpenaiApiKeyInput] = useState("");
 
     useEffect(() => {
         if (!open) {
             return;
         }
 
-        setApiKeyInput(loadArkApiKey());
+        setArkApiKeyInput(loadArkApiKey());
+        setOpenaiApiKeyInput(loadOpenaiApiKey());
     }, [open]);
 
     // 保存 Key 到本地存储
     const handleSave = useCallback(() => {
-        saveArkApiKey(apiKeyInput);
+        saveArkApiKey(arkApiKeyInput);
+        saveOpenaiApiKey(openaiApiKeyInput);
         onClose();
-    }, [apiKeyInput, onClose]);
+    }, [arkApiKeyInput, onClose, openaiApiKeyInput]);
 
     // 清除本地 Key
     const handleClear = useCallback(() => {
         clearArkApiKey();
-        setApiKeyInput("");
+        clearOpenaiApiKey();
+        setArkApiKeyInput("");
+        setOpenaiApiKeyInput("");
         onClose();
     }, [onClose]);
 
@@ -50,17 +61,38 @@ export function ArkApiKeySettingsDialog({ open, onClose }: ArkApiKeySettingsDial
                 <h3 className="text-base font-semibold text-slate-900">API KEY</h3>
 
                 <label className="mt-4 block">
-                    <span className="mb-1.5 block text-xs font-medium text-slate-600">火山方舟API KEY</span>
+                    <span className="mb-1.5 block text-xs font-medium text-slate-600">
+                        火山方舟 API KEY
+                    </span>
                     <input
                         type="password"
                         autoComplete="off"
                         spellCheck={false}
-                        value={apiKeyInput}
-                        onChange={(event) => setApiKeyInput(event.target.value)}
+                        value={arkApiKeyInput}
+                        onChange={(event) => setArkApiKeyInput(event.target.value)}
                         placeholder="请输入 ARK_API_KEY"
                         className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400"
                     />
                 </label>
+
+                <label className="mt-4 block">
+                    <span className="mb-1.5 block text-xs font-medium text-slate-600">
+                        AI API KEY
+                    </span>
+                    <input
+                        type="password"
+                        autoComplete="off"
+                        spellCheck={false}
+                        value={openaiApiKeyInput}
+                        onChange={(event) => setOpenaiApiKeyInput(event.target.value)}
+                        placeholder="请输入 AI API KEY"
+                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none transition focus:border-slate-400"
+                    />
+                </label>
+
+                <p className="mt-3 text-xs leading-5 text-slate-400">
+                    自定义 AI API KEY 将优先于服务端环境变量，用于剧本摘要、分集剧本等 Agent 能力。
+                </p>
 
                 <div className="mt-5 flex justify-end gap-2">
                     <button

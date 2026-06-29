@@ -79,18 +79,6 @@ export function NovelScriptPanel({ activeTab, onTabChange }: NovelScriptPanelPro
                 </div>
             </div>
 
-            <p className="mt-4 text-center text-xs text-slate-400">
-                请确认上传的剧本有合法版权
-                <span className="mx-2 text-slate-300">|</span>
-                <button
-                    type="button"
-                    className="cursor-pointer text-slate-500 hover:text-slate-700 disabled:cursor-not-allowed disabled:opacity-60"
-                    disabled={loading}
-                    onClick={() => void enterFreeCanvas()}
-                >
-                    跳过剧本，可直接进入画布
-                </button>
-            </p>
             {errorMessage ? (
                 <p className="mt-2 text-center text-xs text-red-500">{errorMessage}</p>
             ) : null}
